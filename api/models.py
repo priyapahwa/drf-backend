@@ -21,3 +21,9 @@ class Post(models.Model):
 
     def __str__(self):
         return self.title
+
+class Notification(models.Model):
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, null=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    action = models.CharField(max_length=100)
+    action_at = models.DateTimeField(auto_now_add=True)

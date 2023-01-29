@@ -1,14 +1,13 @@
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
-from api.models import Post, User
+from api.models import Post, User, Notification
 
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ("id", "username", "password")
-        extra_kwargs = {"password": {"write_only": True}}
+        fields = ("id", "username", "password", "email")
 
     def create(self, validated_data):
         user = User.objects.create_user(**validated_data)
@@ -37,3 +36,9 @@ class PostSerializer(serializers.ModelSerializer):
         posted_by = self.context["posted_by"]
         post = Post.objects.create(posted_by=posted_by, **validated_data)
         return post
+
+class NotificationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Notification
+        fields = ["id", "post", "user", "action"]
+
