@@ -65,14 +65,13 @@ class PostViewSet(viewsets.ModelViewSet):
     '''
     The `get_queryset` method is overriden to check if the user is a superuser.
     If the user is not a superuser, the queryset is filtered to only return posts created by the user.
-    If the user is a superuser, the queryset returns all posts.
     '''
     def get_queryset(self):
         if not self.request.user.is_superuser:
             return Post.objects.filter(posted_by=self.request.user)
 
         return Post.objects.all()
-
+        
     '''
     The `create`, `update`, and `destroy` methods are overriden to create a notification for the user.
     The methods wrap the `super` method in a `transaction.atomic` block to ensure that the notification is created only if the post is created, updated, or deleted.
@@ -134,3 +133,23 @@ class NotificationView(generics.ListAPIView):
         if not self.request.user.is_superuser:
             raise ValidationError("Unauthorized view.")
         return Notification.objects.all()
+
+
+'''
+The `ArchivePostView` class is used to archive a post.
+The view is a `RetrieveUpdateAPIView` which means it only supports the `GET` and `PATCH` methods.
+The `post_id` is passed as a URL parameter.
+The `patch` method is overriden to archive the post.
+The `is_archived` field of the `post` is set to `True`.
+'''
+class ArchivePostView(generics.RetrieveUpdateAPIView):
+    queryset = Post.objects.all()
+    serializer_class = PostSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    lookup_url_kwarg = "post_id"
+
+    def patch(self, request, *args, **kwargs):
+        post = self.get_object()
+        post.is_archived = True
+        post.save()
+        return Response({"message": "Post archived successfully."})
